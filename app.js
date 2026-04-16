@@ -4,14 +4,15 @@ dotenv.config();
 import express from "express";
 import multer from "multer";
 import imagekit from "./service.js";
-
+import connetDB from "./config/db.js";
+import register from "./model/model.js"
 
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage })
 
 const app = express()
-
+connetDB();
 
 app.post("/send",upload.single('img'),async (req,res)=>{
    try {
@@ -31,4 +32,4 @@ app.post("/send",upload.single('img'),async (req,res)=>{
 
 app.listen(3000,()=>{
     console.log("app is running")
-})
+}) 
