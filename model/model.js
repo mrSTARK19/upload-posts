@@ -5,6 +5,12 @@ const authSchema = mongoose.Schema({
     password : {type:String}
 })
 
-const register = mongoose.model("register",authSchema)
+const imageSchema = mongoose.Schema({
+    url : {type:String},
+    user: {type: mongoose.Schema.Types.ObjectId,ref:register}
+})
 
-export default register;
+const register = mongoose.model("register",authSchema)
+const imageData = mongoose.model("imageData",imageSchema)
+
+export default {register , imageData};
