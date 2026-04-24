@@ -94,7 +94,16 @@ app.get("/images",authMID,async (req,res)=>{
     }catch(error){res.status(404).json({message:"error occured!"})}
 })
 
-// for public route to fetch all images use .find({}) method try to use pagination
+app.get("/my-images",authMID,async (req,res)=>{
+    try {
+        let id = req.user.id
+        let result = await imageData.find({user:id}).select("_id url")
+        res.json(result)
+    } catch (error) {
+        res.send("error occured")
+    }
+})
+
 app.listen(3000, () => {
     console.log("app is running")
 }) 
