@@ -1,34 +1,34 @@
-import React, { useState ,useEffect} from 'react'
+import React, { useState, useEffect } from 'react'
 import axios from 'axios'
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom"
 
 function Login() {
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [message, setMessage] = useState('')
 
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/verify", {
-        withCredentials: true
-      })
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/verify", {
+          withCredentials: true
+        })
 
-      if (res.data.status === "success") {
-       navigate("/home")
+        if (res.data.status === "success") {
+          navigate("/home")
+        }
+
+
+      } catch (err) {
+        navigate("/")
       }
-      
-
-    } catch (err) {
-      navigate("/")
     }
-  }
 
-  checkAuth()
-}, [])
+    checkAuth()
+  }, [])
 
   const handleLogin = async () => {
 
@@ -47,10 +47,10 @@ useEffect(() => {
         { username, password },   // ✅ send data
         { withCredentials: true } // ✅ allow cookies
       )
-      
+
 
       if (res.status === 200) {
-        
+
         setMessage(res.data.message)
         navigate("/home")
       } else {
@@ -86,7 +86,7 @@ useEffect(() => {
           style={styles.input}
         />
 
-        <button 
+        <button
           onClick={handleLogin}
           disabled={!username || !password}
           style={styles.button}
@@ -96,6 +96,15 @@ useEffect(() => {
 
         {error && <p style={styles.error}>{error}</p>}
         {message && <p style={styles.success}>{message}</p>}
+        <p style={styles.signupText}>
+          Don't have an account?{" "}
+          <span
+            style={styles.signupLink}
+            onClick={() => navigate("/signup")}
+          >
+            Sign Up
+          </span>
+        </p>
 
       </div>
     </div>
@@ -147,5 +156,18 @@ const styles = {
   success: {
     color: "green",
     textAlign: "center"
+  },
+  signupText: {
+    textAlign: "center",
+    fontSize: "14px",
+    color: "#555",
+    marginTop: "8px"
+  },
+
+  signupLink: {
+    color: "#007bff",
+    fontWeight: "bold",
+    cursor: "pointer",
+    textDecoration: "underline"
   }
 }
