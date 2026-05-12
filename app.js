@@ -8,17 +8,38 @@ import connetDB from "./config/db.js";
 import {register,imageData} from "./model/model.js"
 import jwt from "jsonwebtoken"
 import cookieParser from "cookie-parser";
+import cors from "cors"
 
 import authMID from "./middlewares/authMiddleware.js";
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage })
+const upload = multer({ storage: storage }) 
 
 const app = express()
 app.use(express.json())
 app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}))
 connetDB();
 
 
+
+
+app.get("/verify", (req, res) => {
+  const token = req.cookies.token
+
+  if (!token) {
+    return res.json({ status: "unauthorized" })
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    res.json({ status: "success", user: decoded })
+  } catch (err) {
+    res.json({ status: "invalid" })
+  }
+})
 
 app.post("/send", upload.single('img'), authMID ,async (req, res) => {
     try {
@@ -47,6 +68,14 @@ app.post("/signin", async (req, res) => {
     let password = req.body.password;
 
     try {
+        const existingUser = await register.findOne({ username })
+        if (existingUser) {
+                return res.json({
+                    status: "failure",
+                    message: "user already exists!"
+                })
+                }
+
         const result = await register({ username, password })
         await result.save()
         res.json({ status: "success", message: "user registered successfully!" })
@@ -86,11 +115,11 @@ app.post("/login", async (req, res) => {
 app.get("/images",authMID,async (req,res)=>{
 
     try{
-            let data = await imageData.find({user: req.user.id})
-            if (data == []){
+            let data = await imageData.find()
+            if (data.length === 0){
                 return res.json({message:"uploaded images here"})
                            }
-            res.json({data:data})
+            res.json(data)
     }catch(error){res.status(404).json({message:"error occured!"})}
 })
 
@@ -98,10 +127,24 @@ app.get("/my-images",authMID,async (req,res)=>{
     try {
         let id = req.user.id
         let result = await imageData.find({user:id}).select("_id url")
+        if (result.length === 0){
+                return res.json({message:"uploaded images here"})
+                           }
         res.json(result)
     } catch (error) {
         res.send("error occured")
     }
+})
+
+app.get("/temp",async (req,res)=>{
+
+    try{
+            let data = await imageData.find()
+            if (data == []){
+                return res.json({message:"uploaded images here"})
+                           }
+            res.json(data)
+    }catch(error){res.status(404).json({message:"error occured!"})}
 })
 
 app.listen(3000, () => {
