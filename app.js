@@ -136,16 +136,36 @@ app.get("/my-images",authMID,async (req,res)=>{
     }
 })
 
-app.get("/temp",async (req,res)=>{
+app.delete("/delete-image/:id", authMID, async (req, res) => {
+  try {
+    const imageId = req.params.id;
+    const userId = req.user.id;
 
-    try{
-            let data = await imageData.find()
-            if (data == []){
-                return res.json({message:"uploaded images here"})
-                           }
-            res.json(data)
-    }catch(error){res.status(404).json({message:"error occured!"})}
-})
+    // Find the image belonging to the logged-in user
+    const image = await imageData.findOne({
+      _id: imageId,
+      user: userId,
+    });
+
+    if (!image) {
+      return res.status(404).json({
+        message: "Image not found",
+      });
+    }
+
+    // Delete the image document from MongoDB
+    await imageData.findByIdAndDelete(imageId);
+
+    return res.status(200).json({
+      message: "Image deleted successfully",
+    });
+  } catch (error) {
+    console.error("Delete image error:", error);
+    return res.status(500).json({
+      message: "Internal server error",
+    });
+  }
+});
 
 app.listen(3000, () => {
     console.log("app is running")
